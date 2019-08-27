@@ -54,10 +54,6 @@ environment {
 agent any
 
 stages{
-    stage('Initialize'){
-        def dockerHome = tool 'myDocker'
-        env.PATH = "${dockerHome}/bin:${env.PATH}"
-    }
     stage('Init'){
         steps{
             //checkout scm;
@@ -86,6 +82,8 @@ stages{
 
     stage('Cleanup'){
         steps{
+            def dockerHome = tool 'myDocker'
+            env.PATH = "${dockerHome}/bin:${env.PATH}"
             sh '''
             docker rmi $(docker images -f 'dangling=true' -q) || true
             docker rmi $(docker images | sed 1,2d | awk '{print $3}') || true
@@ -95,6 +93,8 @@ stages{
     }
     stage('Build'){
         steps{
+            def dockerHome = tool 'myDocker'
+            env.PATH = "${dockerHome}/bin:${env.PATH}"
             withEnv(["APP_NAME=${APP_NAME}", "PROJECT_NAME=${PROJECT_NAME}"]){
                 sh '''
                 docker build -t ${DOCKER_REGISTRY_URL}/${DOCKER_PROJECT_NAMESPACE}/${IMAGE_NAME}:${RELEASE_TAG} --build-arg APP_NAME=${IMAGE_NAME}  -f app/Dockerfile app/.
@@ -104,6 +104,8 @@ stages{
     }
     stage('Publish'){
         steps{
+            def dockerHome = tool 'myDocker'
+            env.PATH = "${dockerHome}/bin:${env.PATH}"
             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${JENKINS_DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWD']])
             {
             sh '''
